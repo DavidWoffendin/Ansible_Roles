@@ -1,0 +1,5 @@
+---
+# Task list for building vms
+- import_tasks: set_facts.yml
+- import_tasks: install_dependencies.yml
+- import_tasks: install_jenkins.yml

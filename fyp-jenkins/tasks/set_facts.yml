@@ -1,0 +1,18 @@
+---
+- name: Set Jenkins YUM/RPM facts (Internet-Facing)
+  set_fact:
+    jenkins_yum_repository_url: 'https://pkg.jenkins.io/redhat-stable'
+    jenkins_rpm_key: 'https://pkg.jenkins.io/redhat-stable/jenkins.io.key'
+  when: jenkins_has_internet_access|bool
+- name: Set Jenkins Package Name (With Version Number)
+  set_fact:
+    jenkins_package_full_name: '{{ jenkins_package_short_name }}-{{ jenkins_version }}'
+  when: jenkins_version is defined
+- name: Set Jenkins Package Name (Without Version Number)
+  set_fact:
+    jenkins_package_full_name: '{{ jenkins_package_short_name }}'
+  when: jenkins_version is not defined
+- name: Set Jenkins Package Installation Name (Repo Install)
+  set_fact:
+    jenkins_package_installation_name: '{{ jenkins_package_full_name }}'
+  when: not jenkins_install_from_rpm|bool

@@ -1,0 +1,30 @@
+---
+- name: 'Start Jenkins'
+  systemd:
+    name: jenkins
+    enabled: yes
+    state: started
+- name: 'Restart Jenkins'
+  systemd:
+    name: jenkins
+    state: restarted
+  become: yes
+- name: 'Remove Temporary Directories (Local)'
+  file:
+    path: '{{ item }}'
+    state: absent
+  with_items:
+    - '{{ jenkins_plugin_cache_dir }}'
+  delegate_to: '127.0.0.1'
+  become: no
+  when: jenkins_plugin_cache_dir_tempfile is defined
+- name: 'Remove Temporary RPM (Remote)'
+  file:
+    path: '{{ rpm_tempfile_remote.path }}'
+    state: absent
+  become: yes
+- name: 'Remove Temporary RPM (Local)'
+  file:
+    path: '{{ rpm_tempfile_local.path }}'
+    state: absent
+  become: no

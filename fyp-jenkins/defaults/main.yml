@@ -1,0 +1,43 @@
+---
+# defaults file for ukcloud.jenkins
+jenkins_plugins_base_url: 'https://updates.jenkins-ci.org'
+jenkins_archive_base_url: 'https://pkg.jenkins.io/redhat'
+jenkins_package_short_name: 'jenkins'
+jenkins_rpm_package_suffix: '-1.1.noarch'
+jenkins_plugins_defaults:
+  - name: job-dsl
+    version: '1.76'
+  - name: structs
+    version: '1.20'
+  - name: script-security
+    version: '1.69'
+  - name: configuration-as-code
+    version: '1.35'
+  - name: configuration-as-code-support
+    version: '1.18'
+jenkins_plugins: []
+jenkins_scheme: 'http'
+jenkins_hostname: 'localhost'
+jenkins_port: 8080
+jenkins_admin_username: 'admin'
+jenkins_java_cli_path: '/var/cache/jenkins/war/WEB-INF/jenkins-cli.jar'
+jenkins_default_scripts:
+  - name: Skip Setup Wizard on Boot
+    script: |
+      import static jenkins.model.Jenkins.instance as jenkins
+      import jenkins.install.InstallState
+      if (!jenkins.installState.isSetupComplete()) {
+        InstallState.INITIAL_SETUP_COMPLETED.initializeState()
+      }
+jenkins_safe_restart:
+  - name: Restart Jenkins Safely
+    script: |
+      import jenkins.model.*
+      Jenkins.instance.doSafeRestart(null);
+jenkins_force_service_restart: no
+jenkins_plugin_timeout: 30
+jenkins_has_internet_access: true
+jenkins_skip_install_plugins: no
+jenkins_install_from_rpm: no
+jenkins_debug: no
+jenkins_version: '2.204.2'

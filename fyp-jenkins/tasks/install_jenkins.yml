@@ -1,0 +1,30 @@
+---
+- include_tasks: 'install_jenkins/from_rpm.yml'
+  when: jenkins_install_from_rpm|bool
+- block:
+    - name: Add Jenkins Yum Repository
+      yum_repository:
+        name: 'jenkins'
+        description: 'Jenkins Yum Repo'
+        baseurl: '{{ jenkins_yum_repository_url }}'
+    - name: Add Jenkins RPM Key
+      rpm_key:
+        state: present
+        key: '{{ jenkins_rpm_key }}'
+  become: yes
+  when:
+    - jenkins_yum_repository_url is defined
+    - jenkins_rpm_key is defined
+- name: Install Jenkins
+  yum:
+    name: '{{ jenkins_package_installation_name }}'
+    state: present
+  become: yes
+  notify: 'Start Jenkins'
+  register: jenkins_installed
+- name: Start Jenkins
+  systemd:
+    name: jenkins
+    state: started
+  register: jenkins_started
+  become: yes

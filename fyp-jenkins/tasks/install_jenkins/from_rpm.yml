@@ -1,0 +1,33 @@
+---
+- name: Make Temporary Directory for RPM (Remote)
+  tempfile:
+    state: directory
+  become: no
+  register: rpm_tempfile_remote
+  notify: 'Remove Temporary RPM (Remote)'
+- block:
+    - name: Make Temporary Directory for RPM (Local)
+      tempfile:
+        state: directory
+        path: '~/.ansible/tmp'
+      register: rpm_tempfile_local
+      notify: 'Remove Temporary RPM (Local)'
+    - name: Fetch RPM From Remote Archive (Local)
+      get_url:
+        url: '{{ jenkins_archive_base_url }}/{{ jenkins_package_full_name }}{{ jenkins_rpm_package_suffix }}.rpm'
+        dest: '{{ rpm_tempfile_local.path }}/jenkins-{{ jenkins_version }}.rpm'
+        mode: 0755
+    - name: Set Jenkins RPM Path
+      set_fact:
+        jenkins_rpm_path: '{{ rpm_tempfile_local.path }}/jenkins-{{ jenkins_version }}.rpm'
+  delegate_to: localhost
+  become: no
+  when: jenkins_rpm_path is not defined
+- name: Transfer RPM to Jenkins Instance (Local)
+  copy:
+    src: '{{ jenkins_rpm_path }}'
+    dest: '{{ rpm_tempfile_remote.path }}/jenkins-{{ jenkins_version }}.rpm'
+- name: Set Jenkins Package Installation Name (RPM Install)
+  set_fact:
+    jenkins_package_installation_name: '{{ rpm_tempfile_remote.path }}/jenkins-{{ jenkins_version }}.rpm'
+  when: jenkins_install_from_rpm|bool
