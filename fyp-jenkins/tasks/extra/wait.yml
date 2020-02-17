@@ -1,0 +1,13 @@
+---
+- block:
+  - name: Wait for Jenkins Webservice Port
+    wait_for:
+      port: 8080
+  - name: Wait for Jenkins Webservice (HTTP)
+    uri:
+      url: '{{ jenkins_scheme }}://{{ jenkins_hostname }}:{{ jenkins_port }}/crumbIssuer/api/json'
+      status_code: 403
+    register: result
+    until: result.status == 403
+    retries: '{{ jenkins_max_http_wait_retries|default(20) }}'
+    delay: 5

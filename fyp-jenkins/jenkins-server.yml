@@ -1,0 +1,10 @@
+---
+# fyp-jenkins/tasks/main.yml
+# Author: David Woffendin 
+# Description: Jenkins Server
+- hosts: jenkins-server
+  roles:
+    - role: fyp-jenkins
+      become: yes
+      tags:
+        - jenkins

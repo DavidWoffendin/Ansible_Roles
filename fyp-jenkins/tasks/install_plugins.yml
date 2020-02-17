@@ -1,0 +1,67 @@
+---
+- block:
+    - name: Create Temporary Plugin Directory (Local)
+      tempfile:
+        state: directory
+      register: jenkins_plugin_cache_dir_tempfile
+      notify: 'Remove Temporary Directories (Local)'
+      when: jenkins_plugin_cache_dir is not defined
+    - name: Create Specified Temporary Plugin Directory (Local)
+      file:
+        path: '{{ jenkins_plugin_cache_dir }}'
+        state: directory
+      when: jenkins_plugin_cache_dir is defined
+    - name: Set Jenkins Plugin Cache Dir
+      set_fact:
+        jenkins_plugin_cache_dir: '{{ jenkins_plugin_cache_dir_tempfile.path|default(jenkins_plugin_cache_dir) }}'
+    - name: Download Latest Plugin (Local)
+      get_url:
+        url: 'https://updates.jenkins.io/latest/{{ item.name }}.hpi'
+        dest: '{{ jenkins_plugin_cache_dir }}/{{ item.name }}-{{ item.version|default("latest") }}.hpi'
+      when: item.version is not defined
+      with_items: '{{ jenkins_plugins | union(jenkins_plugins_defaults) }}'
+    - name: Download Versioned Plugin (Local)
+      get_url:
+        url: 'https://updates.jenkins.io/download/plugins/{{ item.name }}/{{ item.version }}/{{ item.name }}.hpi'
+        dest: '{{ jenkins_plugin_cache_dir }}/{{ item.name }}-{{ item.version|default("latest") }}.hpi'
+      when: item.version is defined
+      with_items: '{{ jenkins_plugins | union(jenkins_plugins_defaults) }}'
+  when:
+    - not jenkins_has_internet_access|bool
+  delegate_to: 127.0.0.1
+  become: no
+- name: Install Plugins (From File) (Latest)
+  copy:
+    src: '{{ jenkins_plugin_cache_dir }}/{{ item.name }}-{{ item.version|default("latest") }}.hpi'
+    dest: '/var/lib/jenkins/plugins/{{ item.name }}.hpi'
+    owner: jenkins
+    group: jenkins
+  with_items: '{{ jenkins_plugins | union(jenkins_plugins_defaults) }}'
+  register: jenkins_plugin_local_install
+  become: yes
+  when:
+    - not jenkins_has_internet_access|bool
+- block:
+  - include_tasks: 'extra/wait.yml'
+    when: jenkins_started.changed
+  - name: Install Plugins (From URL)
+    jenkins_plugin:
+      name: '{{ item.name }}'
+      version: '{{ item.version | default(omit) }}'
+      url_username: '{{ jenkins_admin_username }}'
+      url_password: '{{ jenkins_ephemeral_admin_password }}'
+      force_basic_auth: yes
+      state: present
+      timeout: '{{ jenkins_plugin_timeout }}'
+    with_items: '{{ jenkins_plugins | union(jenkins_plugins_defaults) }}'
+    register: jenkins_plugin_remote_install
+  when:
+    - jenkins_has_internet_access|bool
+
+- name: Restart Jenkins Safely after Plugin Installation
+  jenkins_script:
+    script: '{{ item.script }}'
+    user: '{{ jenkins_admin_username }}'
+    password: '{{ jenkins_ephemeral_admin_password }}'
+  with_items: '{{ jenkins_safe_restart }}'
+  when: jenkins_plugin_local_install is changed or jenkins_plugin_remote_install is changed

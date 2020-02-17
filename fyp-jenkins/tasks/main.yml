@@ -1,5 +1,19 @@
 ---
 # Task list for building vms
+- import_tasks: verify.yml
 - import_tasks: set_facts.yml
 - import_tasks: install_dependencies.yml
 - import_tasks: install_jenkins.yml
+- import_tasks: set_admin_password.yml
+- import_tasks: create_user_creation_script.yml
+- include_tasks: create_users.yml
+  when: jenkins_users is defined
+- import_tasks: install_plugins.yml
+  when: not jenkins_skip_install_plugins
+- import_tasks: jenkins_scripts.yml
+- include_tasks: create_admin_user.yml
+- name: Restart Jenkins
+  systemd:
+    name: jenkins
+    state: restarted
+  when: jenkins_force_service_restart

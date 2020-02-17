@@ -1,0 +1,12 @@
+---
+- name: Modify Jenkins Admin User
+  shell: "/usr/local/bin/create-jenkins-user '{{ jenkins_admin_username }}' '{{ jenkins_admin_password }}' '{{ jenkins_ephemeral_admin_password }}'"
+  register: jenkins_admin_user_modify
+- name: '(DEBUG) Print Result of "Modify Jenkins Admin User"'
+  debug:
+    msg: '{{ jenkins_admin_user_modify.stdout }}'
+  when: jenkins_debug|bool
+- name: Remove Initial Admin Password From FS
+  file:
+    path: '/var/lib/jenkins/secrets/initialAdminPassword'
+    state: absent

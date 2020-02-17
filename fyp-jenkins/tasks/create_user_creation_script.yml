@@ -1,0 +1,10 @@
+---
+- include_tasks: extra/wait.yml
+- name: Create User Creation Script
+  copy:
+    src: 'create_jenkins_user.sh'
+    dest: '/usr/local/bin/create-jenkins-user'
+    owner: jenkins
+    group: jenkins
+    mode: 0755
+  become: yes

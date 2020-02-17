@@ -1,0 +1,6 @@
+---
+- name: Create Jenkins Users
+  shell: '/usr/local/bin/create-jenkins-user {{ item.username }} {{ item.password }} {{ jenkins_ephemeral_admin_password }}'
+  with_items: '{{ jenkins_users }}'
+  when: item.username != 'admin'
+  no_log: '{{ not jenkins_debug|bool }}'

@@ -41,3 +41,8 @@ jenkins_skip_install_plugins: no
 jenkins_install_from_rpm: no
 jenkins_debug: no
 jenkins_version: '2.204.2'
+jenkins_theme_plugin_version: '0.6'
+jenkins_theme_url: "http://afonsof.com/jenkins-material-theme/dist/material-teal.css"
+jenkins_theme_home: '/var/lib/jenkins/userContent/theme'
+jenkins_theme_delegate_download: no
+jenkins_debug: no

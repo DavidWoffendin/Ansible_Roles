@@ -1,0 +1,5 @@
+---
+- name: Verify Admin Account Password Has Been Set
+  fail:
+    msg: 'Admin Account Password is not set! Use "jenkins_admin_password" to set'
+  when: jenkins_admin_password is not defined
