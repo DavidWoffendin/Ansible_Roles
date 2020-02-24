@@ -1,0 +1,17 @@
+---
+- name: Deploy Configuration as code config
+  template: 
+    src: '{{ jcasc_config_template_path }}'
+    dest: '/var/lib/jenkins/jenkins.yaml'
+    owner: jenkins
+    group: jenkins
+  when: jcasc_config is defined
+- name: Reload Configuration
+  jenkins_script:
+    script: |
+      import io.jenkins.plugins.casc.ConfigurationAsCode;
+      ConfigurationAsCode.get().configure()
+    user: '{{jcasc_script_user }}'
+    password: '{{ jcasc_script_password }}'
+    timeout: '{{ jcasc_reload_timeout }}'
+  when: jcasc_reload_configuration|bool

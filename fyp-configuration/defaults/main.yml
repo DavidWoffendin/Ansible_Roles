@@ -1,0 +1,5 @@
+---
+# Defaults for configuration role
+jcasc_config_template_path: 'jenkins.yaml.j2'
+jcasc_reload_configuration: no
+jcasc_reload_timeout: 30
