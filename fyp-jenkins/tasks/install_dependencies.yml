@@ -1,7 +1,7 @@
 ---
 - name: Install Dependencies
   yum:
-    name: ['git', 'java-1.8.0-openjdk']
+    name: '{{ vm_packages }}'
     state: present
   become: yes
 - name: Install Additional Dependencies
