@@ -17,3 +17,4 @@
     name: jenkins
     state: restarted
   when: jenkins_force_service_restart
+  
